@@ -55,3 +55,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# --- Claude Code: local per-machine permissions, not shared ---
+.claude/settings.local.json
