@@ -49,30 +49,44 @@ So SpecLedger does not compete with generation. It makes generation shippable:
 ## Results
 
 Measured on 12 SKUs across 7 real vendor datasheets (Vishay, Diodes Inc, Texas
-Instruments), graded against 91 labels transcribed from those PDFs. Both arms run
-the same inputs and the same documents. Reproduce with `make eval`.
+Instruments), graded against 98 labels transcribed from those PDFs, with the LLM
+extractor (Amazon Nova Lite, via AWS Bedrock) live in the panel. Both arms run
+the same inputs and the same documents. Reproduce with `make eval` after adding
+AWS credentials to `.env` (see Quickstart).
 
 | metric | naive extraction | SpecLedger |
 |---|---:|---:|
-| coverage | 100% | 94.5% |
-| auto-publish rate | 100% | 76.9% |
-| **precision on published** | **69.2%** | **98.6%** |
+| coverage | 92.9% | 92.9% |
+| auto-publish rate | 100% | 80.0% |
+| **precision on published** | **69.2%** | **98.7%** |
 | **safety-critical precision** | **81.2%** | **100%** |
 | **wrong values published** | **28** | **1** |
-| queued for human review | 0 | 21 |
-| calibration error (ECE) | 0.308 | 0.038 |
+| queued for human review | 0 | 19 |
+| calibration error (ECE) | 0.308 | 0.037 |
 
 The naive arm publishes everything it finds, which is what "just call an LLM"
 looks like in production: 28 wrong specs shipped, no signal about which.
+
+**The LLM's real contribution isn't in this table.** Seven of the 98 gold labels
+(`adjustable`, `polarity`) test attributes stated only in free narrative prose —
+"The LM317 is an adjustable ... positive-voltage regulator" — with no table or
+label/value line for a regex to anchor on. The deterministic extractors cannot
+reach these at all; the naive arm's coverage on them is zero. Nova Lite reads
+them correctly, verified against the same evidence gate as everything else, and
+adds them to `graded attributes` (91 → 95) without moving `wrong values
+published` (still 1, the same pre-existing error, untouched) or safety-critical
+precision (still 100%). That is the shape of the win: strictly additive recall,
+gated by the same verification everything else goes through.
 
 **Risk–coverage frontier** — the knob a distributor actually turns:
 
 | threshold | coverage | precision |
 |---:|---:|---:|
-| 0.00 | 100% | 93.4% |
-| 0.42 | 94.5% | 98.8% |
-| 0.95 | 87.9% | 98.8% |
-| 0.98 | 1.1% | 100% |
+| 0.00 | 100% | 94.7% |
+| 0.46 | 95.8% | 98.9% |
+| 0.90 | 94.7% | 98.9% |
+| 0.95 | 83.2% | 98.7% |
+| 0.98 | 13.7% | 92.3% |
 
 ## Quickstart
 
@@ -169,9 +183,13 @@ forbids it.
 - **Two product classes, electronic components.** The schema registry is the
   extension point; PVF and electrical are the same shape of problem.
 - **SQLite, not Postgres.** Deliberate for a POC a judge must be able to run.
-- **The LLM extractor is implemented but unexercised in these numbers** — no API
-  key was available in the build environment. Every measurement above comes from
-  the deterministic panel, so the reported precision is a floor, not a ceiling.
+- **The LLM extractor runs live against AWS Bedrock (Amazon Nova Lite)** and its
+  measured contribution is in the table above. It ran second, behind three
+  deterministic extractors that already resolve the great majority of attributes
+  correctly on this corpus — so its measurable effect is concentrated on
+  attributes those extractors structurally cannot reach (free-text facts with no
+  table or label/value line), not on raising precision, which was already high.
+  `make llm-check` verifies connectivity without making a full pipeline run.
 
 ## Layout
 

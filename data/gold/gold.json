@@ -8,7 +8,8 @@
     "That ambiguity is real and is precisely why abstention matters: a system that",
     "must emit one number here is guessing.",
     "Truth is per-SKU, not per-MPN: for a Vishay-branded 1N4001 the Vishay datasheet",
-    "is authoritative, and Vishay genuinely differs from Diodes Inc on VF and Tmin."
+    "is authoritative, and Vishay genuinely differs from Diodes Inc on VF and Tmin.",
+    "adjustable/polarity labels were added after the Bedrock/Nova integration landed, to check whether the LLM extractor contributes real coverage on attributes the regex extractors structurally can't reach (free narrative prose, not tables). Each label is a direct quote from the source PDF, gathered before looking at what the LLM returned -- LM317 and LM317L: 'is an adjustable ... positive-voltage regulator'; LM2940: 'positive voltage regulators' + 'Output Voltage Trimmed Before Assembly' (fixed, not adjustable); LM1117: 'is available in an adjustable version' (its polarity is left unlabeled -- the datasheet never states it explicitly)."
   ],
   "labels": {
     "DIO-1N4001-VSH": {
@@ -131,7 +132,9 @@
         "TO-220",
         "TO-263",
         "SOT-223"
-      ]
+      ],
+      "adjustable": true,
+      "polarity": "POSITIVE"
     },
     "REG-LM317L-TI": {
       "output_current_max": 0.1,
@@ -156,7 +159,9 @@
         "SOT-89",
         "TO-92",
         "TSSOP"
-      ]
+      ],
+      "adjustable": true,
+      "polarity": "POSITIVE"
     },
     "REG-LM1117-TI": {
       "output_current_max": 0.8,
@@ -177,7 +182,8 @@
         "TO-220",
         "TO-263",
         "WSON"
-      ]
+      ],
+      "adjustable": true
     },
     "REG-LM2940-TI": {
       "output_current_max": 1.0,
@@ -200,7 +206,9 @@
         "TO-263",
         "SOT-223",
         "WSON"
-      ]
+      ],
+      "adjustable": false,
+      "polarity": "POSITIVE"
     }
   }
 }

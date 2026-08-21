@@ -15,6 +15,7 @@ from specledger.catalog import BY_SKU, known_parts
 from specledger.confidence import ConfidenceModel
 from specledger.extract import extract_from_doc
 from specledger.ingest import ingest
+from specledger.extract import DETERMINISTIC
 from specledger.pipeline import enrich
 
 
@@ -80,7 +81,10 @@ def test_end_to_end_never_publishes_a_wrong_reverse_voltage():
              "DIO-1N4004-VSH": 400.0, "DIO-1N4007-VSH": 1000.0,
              "DIO-1N5817-VSH": 20.0, "DIO-1N5819-VSH": 40.0}
     for sku, want in truth.items():
-        rec = enrich(BY_SKU[sku], model)
+        # DETERMINISTIC pins this test to the regex/table extractors regardless
+        # of whether LLM credentials happen to be configured in the environment --
+        # tests must be hermetic, not dependent on ambient .env state.
+        rec = enrich(BY_SKU[sku], model, extractors=DETERMINISTIC)
         a = rec.attributes.get("reverse_voltage_max")
         assert a is not None, sku
         if a.decision == "AUTO_PUBLISH":

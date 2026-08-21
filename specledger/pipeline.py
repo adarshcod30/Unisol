@@ -61,7 +61,12 @@ def _apply_brand_authority(cands, doc, sku) -> None:
 
 
 def enrich(sku: InputSKU, model: ConfidenceModel | None = None,
-           mode: str = "specledger") -> ProductRecord:
+           mode: str = "specledger", extractors=None) -> ProductRecord:
+    """extractors overrides the strategy panel. Defaults to panel(), which
+    includes the LLM extractor whenever credentials are configured in the
+    environment -- so callers that must stay hermetic (the test suite, notably)
+    pass extractors=DETERMINISTIC explicitly rather than relying on ambient
+    env state to decide whether they make live network calls."""
     model = model or ConfidenceModel.load()
     pclass = schema.get(sku.product_class)
     kp = known_parts()
@@ -84,7 +89,8 @@ def enrich(sku: InputSKU, model: ConfidenceModel | None = None,
             all_cands.extend(_naive_candidates(d, sku, pclass))
         else:
             got = extract_from_doc(
-                d, sku.mpn, pclass, corpus.BY_ID[did].covers, kp, panel())
+                d, sku.mpn, pclass, corpus.BY_ID[did].covers, kp,
+                extractors if extractors is not None else panel())
             _apply_brand_authority(got, d, sku)
             if got and not brand_matches(d.doc.publisher, sku.brand):
                 rec.notes.append(
@@ -145,10 +151,10 @@ def _naive_candidates(d, sku: InputSKU, pclass) -> list[Candidate]:
 
 
 def enrich_all(skus=None, model: ConfidenceModel | None = None,
-               mode: str = "specledger") -> list[ProductRecord]:
+               mode: str = "specledger", extractors=None) -> list[ProductRecord]:
     from .catalog import CATALOG
     model = model or ConfidenceModel.load()
-    return [enrich(s, model, mode) for s in (skus or CATALOG)]
+    return [enrich(s, model, mode, extractors) for s in (skus or CATALOG)]
 
 
 def summarize(records: list[ProductRecord]) -> dict:

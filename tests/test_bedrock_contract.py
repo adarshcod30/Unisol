@@ -146,3 +146,20 @@ def test_prompt_carries_the_sibling_warning(doc, spec, monkeypatch):
     assert "1N4007" in be.prompts[0]
     assert "Part number: 1N4001" in be.prompts[0]
     assert "column for the requested part only" in SYSTEM
+
+
+def test_pipeline_tests_never_call_the_real_network(monkeypatch):
+    """Guards the fix itself: even with credentials configured, enrich_all()
+    must not touch the LLM panel unless the caller opts in explicitly. A test
+    suite whose speed and cost depend on ambient .env contents is not hermetic."""
+    from specledger.catalog import CATALOG
+    from specledger.pipeline import enrich_all
+
+    def _boom(*a, **kw):
+        raise AssertionError("a hermetic test path invoked the network")
+
+    monkeypatch.setattr("specledger.llm.available", lambda: True)   # simulate creds present
+    monkeypatch.setattr("specledger.llm.LLMExtractor.extract", _boom)
+    from specledger.extract import DETERMINISTIC
+    recs = enrich_all(skus=CATALOG[:1], extractors=DETERMINISTIC)
+    assert recs and recs[0].attributes, "deterministic-only extraction still works"

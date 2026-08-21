@@ -8,13 +8,17 @@ import pytest
 from specledger.catalog import CATALOG
 from specledger.confidence import ConfidenceModel
 from specledger.models import DECISION_AUTO
+from specledger.extract import DETERMINISTIC
 from specledger.pipeline import enrich_all
 from specledger.publish import commerce_payload, json_ld
 
 
 @pytest.fixture(scope="module")
 def records():
-    return enrich_all(model=ConfidenceModel.load())
+    # Pinned to DETERMINISTIC: this suite must stay fast, free and hermetic
+    # even when real LLM credentials are sitting in the environment. The live
+    # LLM path is exercised deliberately in eval/run_eval.py, not here.
+    return enrich_all(model=ConfidenceModel.load(), extractors=DETERMINISTIC)
 
 
 def test_every_sku_produces_a_record(records):
