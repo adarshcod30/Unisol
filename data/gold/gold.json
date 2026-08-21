@@ -1,0 +1,206 @@
+{
+  "_README": [
+    "Ground truth read directly from the source PDFs listed in specledger/corpus.py.",
+    "Every value below was transcribed from the vendor's own ratings table -- never",
+    "from recall. Where a datasheet is legitimately ambiguous (LM317L quotes three",
+    "input-differential limits for three die revisions; several parts ship in four",
+    "packages) the label is a SET of acceptable values, and any of them scores correct.",
+    "That ambiguity is real and is precisely why abstention matters: a system that",
+    "must emit one number here is guessing.",
+    "Truth is per-SKU, not per-MPN: for a Vishay-branded 1N4001 the Vishay datasheet",
+    "is authoritative, and Vishay genuinely differs from Diodes Inc on VF and Tmin."
+  ],
+  "labels": {
+    "DIO-1N4001-VSH": {
+      "reverse_voltage_max": 50,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 1.1,
+      "surge_current_max": 30,
+      "operating_temp_min": -50,
+      "operating_temp_max": 150,
+      "package": [
+        "DO-41",
+        "DO-204AL"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N4002-VSH": {
+      "reverse_voltage_max": 100,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 1.1,
+      "surge_current_max": 30,
+      "operating_temp_min": -50,
+      "operating_temp_max": 150,
+      "package": [
+        "DO-41",
+        "DO-204AL"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N4004-VSH": {
+      "reverse_voltage_max": 400,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 1.1,
+      "surge_current_max": 30,
+      "operating_temp_min": -50,
+      "operating_temp_max": 150,
+      "package": [
+        "DO-41",
+        "DO-204AL"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N4007-VSH": {
+      "reverse_voltage_max": 1000,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 1.1,
+      "surge_current_max": 30,
+      "operating_temp_min": -50,
+      "operating_temp_max": 150,
+      "package": [
+        "DO-41",
+        "DO-204AL"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N4001-DIO": {
+      "reverse_voltage_max": 50,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 1.0,
+      "surge_current_max": 30,
+      "operating_temp_min": -65,
+      "operating_temp_max": 150,
+      "package": [
+        "DO-41"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N4007-DIO": {
+      "reverse_voltage_max": 1000,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 1.0,
+      "surge_current_max": 30,
+      "operating_temp_min": -65,
+      "operating_temp_max": 150,
+      "package": [
+        "DO-41"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N5817-VSH": {
+      "reverse_voltage_max": 20,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 0.45,
+      "surge_current_max": 25,
+      "operating_temp_min": -65,
+      "operating_temp_max": 125,
+      "package": [
+        "DO-41",
+        "DO-204AL"
+      ],
+      "rohs_compliant": true
+    },
+    "DIO-1N5819-VSH": {
+      "reverse_voltage_max": 40,
+      "forward_current_avg": 1.0,
+      "forward_voltage_max": 0.6,
+      "surge_current_max": 25,
+      "operating_temp_min": -65,
+      "operating_temp_max": 125,
+      "package": [
+        "DO-41",
+        "DO-204AL"
+      ],
+      "rohs_compliant": true
+    },
+    "REG-LM317-TI": {
+      "output_current_max": 1.5,
+      "input_voltage_max": 40,
+      "output_voltage_min": 1.25,
+      "output_voltage_max": 37,
+      "operating_temp_min": [
+        -65,
+        -55,
+        0
+      ],
+      "operating_temp_max": [
+        125,
+        150
+      ],
+      "package": [
+        "TO-220",
+        "TO-263",
+        "SOT-223"
+      ]
+    },
+    "REG-LM317L-TI": {
+      "output_current_max": 0.1,
+      "input_voltage_max": [
+        35,
+        40,
+        45
+      ],
+      "output_voltage_min": 1.25,
+      "output_voltage_max": 37,
+      "operating_temp_min": [
+        -65,
+        -55,
+        0
+      ],
+      "operating_temp_max": [
+        125,
+        150
+      ],
+      "package": [
+        "SOIC",
+        "SOT-89",
+        "TO-92",
+        "TSSOP"
+      ]
+    },
+    "REG-LM1117-TI": {
+      "output_current_max": 0.8,
+      "input_voltage_max": 20,
+      "output_voltage_min": 1.25,
+      "output_voltage_max": 13.8,
+      "operating_temp_min": [
+        -65,
+        -40,
+        0
+      ],
+      "operating_temp_max": [
+        125,
+        150
+      ],
+      "package": [
+        "SOT-223",
+        "TO-220",
+        "TO-263",
+        "WSON"
+      ]
+    },
+    "REG-LM2940-TI": {
+      "output_current_max": 1.0,
+      "input_voltage_max": [
+        26,
+        45,
+        60
+      ],
+      "operating_temp_min": [
+        -65,
+        -40
+      ],
+      "operating_temp_max": [
+        125,
+        150
+      ],
+      "dropout_voltage_typ": 0.5,
+      "package": [
+        "TO-220",
+        "TO-263",
+        "SOT-223",
+        "WSON"
+      ]
+    }
+  }
+}

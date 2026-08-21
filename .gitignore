@@ -28,14 +28,18 @@ build/
 .npm/
 .pnpm-store/
 
-# --- Data & model artifacts (large, regenerable) ---
-# NOTE: fixtures/ and data/gold/ are deliberately NOT ignored --
-# the cached source corpus and the frozen gold set MUST be committed
-# so `make eval` is reproducible by the judges.
+# --- Data & model artifacts ---
+# data/gold/ IS committed: the gold set is the basis of every metric we report.
+# data/fixtures/ is NOT: vendor datasheets are copyrighted, so we pin their URLs
+# and SHA-256 in specledger/corpus.py and fetch them with `make fetch`.
 *.db
 *.sqlite3
 data/cache/
 data/scratch/
+data/fixtures/
+data/corpus.lock.json
+data/confidence_model.json
+data/specledger.db
 models/*.pkl
 models/*.joblib
 embeddings/*.npy
