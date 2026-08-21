@@ -102,7 +102,8 @@ sparse SKU (mpn + brand + one marketing line)
   │                      range         two-ended ranges, unit required from the
   │                                    document, never assumed from the schema
   │                      inline_spec   label/value lines, dimension-guarded
-  │                      llm           Claude, same contract (needs a key)
+  │                      llm           Amazon Nova Lite via Bedrock, same
+  │                                    contract (needs AWS credentials)
   │
   ├─ 4  GATE           every quote is re-checked against the document bytes.
   │                    Not found → the value is FABRICATED and is dropped.
@@ -118,7 +119,7 @@ sparse SKU (mpn + brand + one marketing line)
   ├─ 7  RULES          physics as a free validator: surge > continuous,
   │                    Vin_max > Vout_max, Tmin < Tmax.
   │
-  ├─ 8  CALIBRATE      logistic regression over 10 evidence features → P(correct),
+  ├─ 8  CALIBRATE      logistic regression over 11 evidence features → P(correct),
   │                    threshold chosen to meet a precision floor on OUT-OF-FOLD
   │                    predictions → AUTO_PUBLISH / REVIEW / REJECT
   │
@@ -131,7 +132,8 @@ sparse SKU (mpn + brand + one marketing line)
 normalization and calibration are deterministic. The LLM is a pluggable candidate
 *generator*; the confidence features describe the **evidence**, not the generator,
 which is why the same calibration holds whether candidates came from regexes or
-from Claude.
+from the LLM, and why swapping the backend (Nova Lite today, via Bedrock) does
+not invalidate anything measured here.
 
 **Units must come from the document.** An early version defaulted a missing unit
 to the schema's unit, and confidently published a thermal-resistance figure as a

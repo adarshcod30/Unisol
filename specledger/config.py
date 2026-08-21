@@ -24,19 +24,26 @@ for _p in (DATA, FIXTURES, GOLD, CACHE, EVAL_OUT):
 PIPELINE_VERSION = "0.3.0"
 
 # ---- LLM backend -----------------------------------------------------------
-# Two ways to reach Claude. Bedrock is the default because it is what the AWS
-# credentials in .env are for; the direct Anthropic API is kept as an alternative.
+# Bedrock is the default backend, talking to Amazon Nova Lite -- the same model
+# AGENTIQ uses, and the one the AWS credentials in .env are provisioned for.
+# A direct-to-provider API is kept as a fallback path for local development.
 # Credentials are ALWAYS read from the environment at call time and are never
 # logged, serialised into a record, or written to the audit trail.
 LLM_BACKEND = os.environ.get("SPECLEDGER_LLM_BACKEND", "bedrock").strip().lower()
 
+# Fallback path: a directly-configured provider API key, used only when
+# LLM_BACKEND is not "bedrock". Not used by default.
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-LLM_MODEL = os.environ.get("SPECLEDGER_MODEL", "claude-sonnet-4-5")
+LLM_MODEL = os.environ.get("SPECLEDGER_MODEL", "")
 
 AWS_REGION = (os.environ.get("AWS_REGION")
               or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1")
+# Nova Lite requires a region-prefixed inference profile for on-demand
+# invocation -- calling the bare foundation-model ID ("amazon.nova-lite-v1:0")
+# throws ValidationException: on-demand throughput isn't supported for this
+# model. The us./eu./apac. prefix routes to the profile instead.
 BEDROCK_MODEL = os.environ.get(
-    "SPECLEDGER_BEDROCK_MODEL", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
+    "SPECLEDGER_BEDROCK_MODEL", "us.amazon.nova-lite-v1:0")
 _AWS_KEYS_PRESENT = bool(os.environ.get("AWS_ACCESS_KEY_ID")
                          and os.environ.get("AWS_SECRET_ACCESS_KEY"))
 

@@ -1,7 +1,11 @@
-"""Claude-backed extraction over AWS Bedrock (or the direct Anthropic API).
+"""LLM-backed extraction over AWS Bedrock, talking to Amazon Nova Lite by
+default -- the same model AGENTIQ uses. A direct-to-provider API is kept as a
+fallback path for local development, selected via SPECLEDGER_LLM_BACKEND.
 
 The LLM is a candidate GENERATOR, not an oracle. It proposes values; verify.py
-decides whether they survive. That separation is the whole architecture:
+decides whether they survive. That separation is the whole architecture, and it
+is what makes the backend swappable: nothing downstream of extract() cares
+whether a candidate came from Nova, Claude, or a regex.
 
   * The model must return a VERBATIM quote, which we then locate ourselves.
   * "NOT_FOUND" is a first-class answer and is never penalised.
@@ -107,11 +111,12 @@ class BedrockBackend:
 
 
 class AnthropicBackend:
-    """Direct Anthropic API, kept as an alternative to Bedrock."""
+    """Direct-to-provider fallback, used only when SPECLEDGER_LLM_BACKEND is set
+    to something other than "bedrock". Bedrock/Nova is the default path."""
     name = "anthropic"
 
     def __init__(self, model: str | None = None):
-        self.model = model or config.LLM_MODEL
+        self.model = model or config.LLM_MODEL or "claude-sonnet-4-5"
         self._client = None
 
     def client(self):
