@@ -35,6 +35,9 @@ FEATURES = [
     "column_resolved",         # value came from a resolved series-table column
     "n_quarantined",           # candidates killed by the contamination guard
     "has_focus",               # evidence pins an exact cell, not just a row
+    "self_consistency",        # agreement across independent LLM samples; always
+                               # 1.0 for deterministic extractors, which are
+                               # reproducible by construction
 ]
 
 _MATCH_SCORE = {MATCH_EXACT: 1.0, MATCH_NORMALIZED: 0.9, MATCH_RELOCATED: 0.55}
@@ -59,14 +62,18 @@ def featurize(attr: ResolvedAttribute) -> np.ndarray:
         1.0 if (win and win.column_index >= 0) else 0.0,
         min(sum(1 for c in attr.candidates if c.contaminated_by), 4) / 4.0,
         1.0 if (ev and ev.focus_start >= 0) else 0.0,
+        float(win.self_consistency) if win else 1.0,
     ], dtype=float)
 
 
 # Transparent prior used before any gold set exists. Weights are hand-set and
 # readable on purpose: this is the "no training data yet" cold-start path, and a
 # reviewer should be able to audit it without loading a pickle.
-PRIOR_W = np.array([1.6, 2.2, 1.5, -2.6, -0.9, -2.4, 1.0, 1.3, -0.5, 0.6])
+PRIOR_W = np.array([1.6, 2.2, 1.5, -2.6, -0.9, -2.4, 1.0, 1.3, -0.5, 0.6, 1.1])
 PRIOR_B = -1.9
+assert len(PRIOR_W) == len(FEATURES), (
+    f"cold-start prior has {len(PRIOR_W)} weights but there are {len(FEATURES)} "
+    f"features; they must stay in lockstep")
 
 
 def _sigmoid(z):
@@ -204,7 +211,24 @@ class ConfidenceModel:
         m.thresholds = Thresholds(t.get("general", 0.9), t.get("safety", 0.97),
                                   t.get("reject_below", 0.25))
         m.metrics = blob.get("metrics", {})
+        # A persisted model and the feature builder can drift apart: add a feature
+        # and a stale file still loads, then dies at matmul time. Validate the
+        # schema and fall back to the readable prior rather than failing at
+        # predict time, and make the staleness visible instead of silent.
+        saved_features = blob.get("features") or []
+        if saved_features and list(saved_features) != list(FEATURES):
+            m.metrics = {
+                "note": "saved model is stale (feature schema changed); using the "
+                        "cold-start prior. Run `make eval` to refit.",
+                "saved_features": len(saved_features),
+                "current_features": len(FEATURES),
+            }
+            return m
         if blob.get("trained") and blob.get("coef"):
+            if len(blob["coef"]) != len(FEATURES):
+                m.metrics = {"note": "coefficient count does not match FEATURES; "
+                                     "using the cold-start prior. Run `make eval`."}
+                return m
             clf = LogisticRegression()
             clf.coef_ = np.array([blob["coef"]])
             clf.intercept_ = np.array([blob["intercept"]])

@@ -54,3 +54,23 @@ def test_every_numeric_attribute_declares_a_plausible_range():
         for a in pclass.attributes:
             if a.dtype == "number":
                 assert a.plausible_min is not None and a.plausible_max is not None, a.name
+
+
+def test_stale_persisted_model_falls_back_to_the_prior(tmp_path):
+    """Adding a feature must not produce a model that loads and then crashes."""
+    import json
+    from specledger.confidence import ConfidenceModel, FEATURES
+    p = tmp_path / "m.json"
+    p.write_text(json.dumps({
+        "trained": True, "coef": [0.1] * (len(FEATURES) - 1),
+        "intercept": 0.0, "features": FEATURES[:-1],
+        "thresholds": {"general": 0.9, "safety": 0.97, "reject_below": 0.25},
+    }))
+    m = ConfidenceModel.load(p)
+    assert not m.trained, "a stale model must not be used"
+    assert "stale" in m.metrics.get("note", "").lower()
+
+
+def test_cold_start_prior_matches_the_feature_list():
+    from specledger.confidence import PRIOR_W, FEATURES
+    assert len(PRIOR_W) == len(FEATURES)

@@ -89,6 +89,11 @@ class Candidate:
                                   # static per-extractor constant loses that.
     column_index: int = -1        # which column of a series table, -1 if n/a
     column_of: int = -1           # how many columns that table had
+    self_consistency: float = 1.0 # fraction of independent LLM samples that
+                                  # produced this same value. Disagreement across
+                                  # samples is real uncertainty, unlike a model's
+                                  # self-reported confidence.
+    samples: int = 1
     section: str = "OTHER"        # datasheet section the evidence came from
     from_graph: bool = False      # evidence sits among chart axis labels
     contaminated_by: str = ""     # a sibling MPN found in the evidence window

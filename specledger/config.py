@@ -23,9 +23,35 @@ for _p in (DATA, FIXTURES, GOLD, CACHE, EVAL_OUT):
 
 PIPELINE_VERSION = "0.3.0"
 
+# ---- LLM backend -----------------------------------------------------------
+# Two ways to reach Claude. Bedrock is the default because it is what the AWS
+# credentials in .env are for; the direct Anthropic API is kept as an alternative.
+# Credentials are ALWAYS read from the environment at call time and are never
+# logged, serialised into a record, or written to the audit trail.
+LLM_BACKEND = os.environ.get("SPECLEDGER_LLM_BACKEND", "bedrock").strip().lower()
+
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 LLM_MODEL = os.environ.get("SPECLEDGER_MODEL", "claude-sonnet-4-5")
-LLM_AVAILABLE = bool(ANTHROPIC_API_KEY)
+
+AWS_REGION = (os.environ.get("AWS_REGION")
+              or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1")
+BEDROCK_MODEL = os.environ.get(
+    "SPECLEDGER_BEDROCK_MODEL", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
+_AWS_KEYS_PRESENT = bool(os.environ.get("AWS_ACCESS_KEY_ID")
+                         and os.environ.get("AWS_SECRET_ACCESS_KEY"))
+
+# How many independent samples to draw per extraction. Agreement across samples
+# is a genuine uncertainty signal and feeds the confidence model; 1 disables it.
+LLM_SAMPLES = int(os.environ.get("SPECLEDGER_LLM_SAMPLES", "3"))
+
+
+def llm_available() -> bool:
+    if LLM_BACKEND == "bedrock":
+        return _AWS_KEYS_PRESENT
+    return bool(ANTHROPIC_API_KEY)
+
+
+LLM_AVAILABLE = llm_available()
 
 # Target precision floor for auto-publish. The business sets this; the calibrator
 # then finds the confidence threshold that achieves it. This is the knob a

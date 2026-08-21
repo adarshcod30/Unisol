@@ -2,7 +2,7 @@ VENV := .venv
 PY   := $(VENV)/bin/python
 PIP  := $(VENV)/bin/pip
 
-.PHONY: help setup fetch run eval test demo clean reset
+.PHONY: help setup fetch run eval test demo clean reset llm-check
 
 help:
 	@echo "SpecLedger — verifiable product intelligence"
@@ -12,6 +12,7 @@ help:
 	@echo "  make eval    run the evaluation: naive baseline vs SpecLedger, fit calibrator"
 	@echo "  make run     start the API + Review Cockpit on http://127.0.0.1:8077"
 	@echo "  make test    run the test suite"
+	@echo "  make llm-check  verify the Bedrock/Anthropic backend is reachable"
 	@echo "  make demo    setup + fetch + eval + test, then start the cockpit"
 
 $(VENV):
@@ -24,6 +25,9 @@ setup: $(VENV)
 
 fetch:
 	$(PY) -m specledger.corpus
+
+llm-check:
+	$(PY) -m specledger.llm
 
 eval:
 	$(PY) eval/run_eval.py
