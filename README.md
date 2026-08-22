@@ -97,6 +97,14 @@ make setup && make fetch && make eval && make run
 Then open <http://127.0.0.1:8077>. No API key, no database server, no container.
 `make fetch` downloads 7 datasheets (~10 MB) from vendor sites.
 
+The server opens the port immediately and warms the catalog in a background
+thread; the cockpit shows a loading state until it's ready rather than hanging
+with no explanation. With no LLM credentials this takes a few seconds. With
+`ANTHROPIC_API_KEY` or AWS credentials configured (see `.env.example`), the LLM
+extractor joins the panel and this first warm-up makes real API calls with
+self-consistency sampling, which can take a few minutes on the full 12-SKU
+catalog — a one-time cost per server start, not per request.
+
 ## How it works
 
 ```

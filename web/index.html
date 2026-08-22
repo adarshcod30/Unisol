@@ -4,115 +4,418 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 :root{
-  --bg:#0d1117; --panel:#161b22; --panel2:#1c2128; --line:#30363d;
-  --fg:#e6edf3; --dim:#8b949e; --accent:#2f81f7; --cyan:#39d0d8;
-  --ok:#3fb950; --warn:#d29922; --bad:#f85149; --hl:#ffd33d;
-  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --bg:#090c12; --bg2:#0c1017;
+  --panel:#0f141d; --panel2:#151b27; --panel3:#1b2333;
+  --line:#212a3b; --line2:#2b3650;
+  --fg:#eef2f8; --dim:#93a1ba; --faint:#5c6a87;
+  --accent:#3b82f6; --accent2:#22d3ee;
+  --ok:#34d399; --ok-dim:rgba(52,211,153,.14); --ok-line:rgba(52,211,153,.35);
+  --warn:#fbbf24; --warn-dim:rgba(251,191,36,.14); --warn-line:rgba(251,191,36,.35);
+  --bad:#f87171; --bad-dim:rgba(248,113,113,.14); --bad-line:rgba(248,113,113,.35);
+  --hl:#fbbf24;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+  --shadow:0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);
-  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
-header{display:flex;align-items:center;gap:18px;padding:12px 20px;
-  border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:9}
-.logo{font-weight:700;letter-spacing:-.02em;font-size:16px}
-.logo span{color:var(--cyan)}
-.tag{color:var(--dim);font-size:12px}
-nav{margin-left:auto;display:flex;gap:4px}
-nav button{background:transparent;border:1px solid transparent;color:var(--dim);
-  padding:6px 13px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500}
-nav button:hover{color:var(--fg);background:var(--panel2)}
-nav button.on{background:var(--accent);color:#fff}
-.stats{display:flex;gap:16px;flex-wrap:wrap;padding:10px 20px;
-  border-bottom:1px solid var(--line);background:var(--panel2);font-size:12px}
-.stat b{color:var(--fg);font-size:15px;font-variant-numeric:tabular-nums}
-.stat i{color:var(--dim);font-style:normal;margin-left:5px}
-main{display:grid;grid-template-columns:236px minmax(420px,1fr) minmax(340px,520px);
-  height:calc(100vh - 96px)}
-@media(max-width:1100px){main{grid-template-columns:1fr}}
-.col{overflow-y:auto;padding:14px}
+::selection{background:rgba(59,130,246,.35)}
+body{margin:0;background:
+    radial-gradient(1100px 500px at 15% -8%, rgba(59,130,246,.08), transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, rgba(34,211,238,.06), transparent 55%),
+    var(--bg);
+  color:var(--fg);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a{color:var(--accent2);text-decoration:none} a:hover{text-decoration:underline}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:16px;padding:11px 22px;flex-wrap:wrap;row-gap:8px;
+  border-bottom:1px solid var(--line);background:rgba(12,16,23,.9);backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:30px;height:30px;flex:none}
+.wordmark{display:flex;flex-direction:column;line-height:1.15}
+.wordmark b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.wordmark b i{font-style:normal;background:linear-gradient(90deg,var(--accent2),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.wordmark span{font-size:11px;color:var(--faint);font-weight:500}
+.llmpill{display:flex;align-items:center;gap:7px;padding:5px 11px 5px 9px;border-radius:99px;
+  border:1px solid var(--line2);background:var(--panel2);font-size:12px;font-weight:600;color:var(--dim);
+  cursor:default;transition:border-color .15s;white-space:nowrap;flex:none}
+.llmpill .dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
+.llmpill.live{border-color:var(--ok-line);color:var(--ok)}
+.llmpill.live .dot{background:var(--ok);box-shadow:0 0 0 0 rgba(52,211,153,.55);
+  animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.iconbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);
+  color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.iconbtn:hover{color:var(--fg);border-color:var(--accent);background:var(--panel3)}
+nav{margin-left:auto;display:flex;gap:16px;align-items:center}
+.segmented{display:flex;gap:2px;background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:2px}
+.segmented button{background:transparent;border:none;color:var(--dim);padding:6px 14px;border-radius:7px;
+  cursor:pointer;font-size:12.5px;font-weight:600;transition:.15s}
+.segmented button:hover{color:var(--fg)}
+.segmented button.on{background:linear-gradient(180deg,#3f8cf9,var(--accent));color:#fff;
+  box-shadow:0 2px 8px rgba(59,130,246,.35)}
+
+/* ---------- stat strip ---------- */
+.stats{display:flex;gap:10px;flex-wrap:wrap;padding:11px 22px;
+  border-bottom:1px solid var(--line);background:var(--panel);}
+.stat{display:flex;align-items:center;gap:9px;padding:7px 12px;border-radius:10px;
+  background:var(--panel2);border:1px solid var(--line);min-width:0}
+.stat svg{flex:none;color:var(--faint)}
+.stat b{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;font-weight:700}
+.stat i{font-style:normal;color:var(--faint);font-size:11px;margin-left:5px;white-space:nowrap}
+.stat.accent svg{color:var(--accent2)}
+
+/* ---------- layout ---------- */
+main{display:grid;grid-template-columns:250px minmax(430px,1fr) minmax(360px,540px);
+  height:calc(100vh - 106px)}
+@media(max-width:1150px){main{grid-template-columns:1fr}}
+.col{overflow-y:auto;padding:16px}
 .col+.col{border-left:1px solid var(--line)}
-h3{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
-.sku{padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:3px}
-.sku:hover{background:var(--panel2)}
-.sku.on{background:var(--panel2);border-color:var(--accent)}
-.sku .id{font-family:var(--mono);font-size:12px;font-weight:600}
-.sku .meta{color:var(--dim);font-size:11px;margin-top:2px}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--dim);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
-td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
-tr.row{cursor:pointer}
-tr.row:hover td{background:var(--panel2)}
-tr.on td{background:#132030}
-.val{font-family:var(--mono);font-weight:600}
-.badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;
-  font-weight:700;letter-spacing:.04em}
-.AUTO_PUBLISH{background:rgba(63,185,80,.16);color:var(--ok)}
-.REVIEW{background:rgba(210,153,34,.16);color:var(--warn)}
-.REJECT{background:rgba(248,81,73,.16);color:var(--bad)}
-.crit{color:var(--bad);font-weight:700;margin-left:4px}
-.bar{height:3px;background:var(--line);border-radius:2px;margin-top:5px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent)}
-.ev{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
-.quote{font-family:var(--mono);font-size:12px;background:#0b1622;border-left:3px solid var(--hl);
-  padding:9px 11px;border-radius:0 5px 5px 0;white-space:pre-wrap;word-break:break-word;
-  max-height:190px;overflow:auto;color:#cbd5e1}
-.pg{width:100%;border-radius:6px;border:1px solid var(--line);background:#fff;margin-top:10px;display:block}
-.why{list-style:none;padding:0;margin:8px 0 0}
-.why li{font-size:12px;color:var(--dim);padding:3px 0 3px 15px;position:relative}
-.why li:before{content:"›";position:absolute;left:2px;color:var(--accent)}
-.why li.bad:before{content:"✕";color:var(--bad)}
-.why li.good:before{content:"✓";color:var(--ok)}
-.k{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.chip{display:inline-block;font-family:var(--mono);font-size:11px;background:var(--panel2);
-  border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin:2px 3px 0 0}
-.chip.warn{border-color:var(--warn);color:var(--warn)}
-.acts{display:flex;gap:7px;margin-top:11px}
-.acts button{flex:1;padding:7px;border-radius:6px;border:1px solid var(--line);
-  background:var(--panel2);color:var(--fg);cursor:pointer;font-size:12px;font-weight:600}
-.acts .a{border-color:var(--ok);color:var(--ok)} .acts .a:hover{background:rgba(63,185,80,.12)}
-.acts .r{border-color:var(--bad);color:var(--bad)} .acts .r:hover{background:rgba(248,81,73,.12)}
-.qitem{border:1px solid var(--line);border-radius:7px;padding:10px;margin-bottom:8px;
-  cursor:pointer;background:var(--panel)}
-.qitem:hover{border-color:var(--accent)}
-.qitem.on{border-color:var(--accent);background:#132030}
-.risk{float:right;font-family:var(--mono);font-size:11px;color:var(--warn)}
-.wide{padding:20px;overflow-y:auto;height:calc(100vh - 96px)}
-.mt{width:100%;max-width:940px;border-collapse:collapse;margin-bottom:26px}
-.mt td,.mt th{padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.colhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+h3{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:700}
+
+/* ---------- catalog list ---------- */
+.skucard{padding:10px 11px;border-radius:10px;cursor:pointer;border:1px solid transparent;
+  margin-bottom:5px;transition:.15s;background:transparent}
+.skucard:hover{background:var(--panel2)}
+.skucard.on{background:var(--panel3);border-color:var(--accent);box-shadow:0 0 0 1px rgba(59,130,246,.15)}
+.skucard .top{display:flex;align-items:center;justify-content:space-between}
+.skucard .id{font-family:var(--mono);font-size:13px;font-weight:700}
+.skucard .brand{font-size:10.5px;color:var(--faint);background:var(--panel3);border:1px solid var(--line2);
+  border-radius:5px;padding:1px 6px;font-weight:600}
+.skucard .meta{display:flex;align-items:center;gap:7px;margin-top:7px}
+.mini-bar{flex:1;height:4px;border-radius:3px;background:var(--line);overflow:hidden}
+.mini-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--ok));border-radius:3px}
+.skucard .frac{font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:nowrap}
+.warnpip{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--warn);font-weight:700}
+
+/* ---------- record header card ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:14px}
+.inputquote{font-style:italic;color:var(--fg);font-size:14px;margin-top:6px;line-height:1.5;
+  border-left:2px solid var(--line2);padding-left:11px}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;
+  background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:2px 8px;color:var(--dim)}
+.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-dim)}
+.readyrow{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.gauge{position:relative;width:50px;height:50px;flex:none}
+.gauge svg{transform:rotate(-90deg);width:100%;height:100%}
+.gauge circle{fill:none;stroke-width:4.5}
+.gauge .bg{stroke:var(--line2)}
+.gauge .fg{stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)}
+.gauge .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:800;font-size:13px}
+.readytext b{font-size:12.5px;display:block}
+.readytext span{font-size:11.5px;color:var(--faint)}
+.callout{display:flex;gap:9px;padding:9px 11px;border-radius:9px;margin-top:9px;font-size:12px;line-height:1.5}
+.callout.info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);color:#bcd4ff}
+.callout.warn{background:var(--warn-dim);border:1px solid var(--warn-line);color:#ffe4a3}
+.callout svg{flex:none;margin-top:1px}
+
+/* ---------- attribute rows ---------- */
+.attrlist{display:flex;flex-direction:column;gap:6px}
+.attr{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;
+  padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  cursor:pointer;transition:.15s}
+.attr:hover{border-color:var(--line2);background:var(--panel2)}
+.attr.on{border-color:var(--accent);background:var(--panel3);box-shadow:0 0 0 1px rgba(59,130,246,.18)}
+.attr .name{display:flex;align-items:center;gap:6px;font-weight:650;font-size:13px}
+.attr .key{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;letter-spacing:.02em}
+.attr .valcol{text-align:right;min-width:0}
+.attr .val{font-family:var(--mono);font-weight:700;font-size:14px;white-space:nowrap}
+.attr .conflictnote{font-size:10px;color:var(--warn);margin-top:3px;white-space:nowrap}
+.attr .deccol{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:108px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:99px;
+  font-size:10px;font-weight:800;letter-spacing:.03em;white-space:nowrap}
+.pill .dot{width:6px;height:6px;border-radius:50%}
+.pill.AUTO_PUBLISH{background:var(--ok-dim);color:var(--ok)} .pill.AUTO_PUBLISH .dot{background:var(--ok)}
+.pill.REVIEW{background:var(--warn-dim);color:var(--warn)} .pill.REVIEW .dot{background:var(--warn)}
+.pill.REJECT{background:var(--bad-dim);color:var(--bad)} .pill.REJECT .dot{background:var(--bad)}
+.confbar{width:100px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.confbar i{display:block;height:100%;border-radius:3px;transition:width .4s ease}
+.confnum{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.safeicon{color:var(--bad);flex:none}
+
+/* ---------- evidence panel ---------- */
+.evhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.evname{font-size:15px;font-weight:750}
+.evkey{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px}
+.evval{font-family:var(--mono);font-size:26px;font-weight:800;margin:12px 0 4px;letter-spacing:-.01em}
+.trail{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--dim);margin:10px 0}
+.trail .seg{display:flex;align-items:center;gap:5px}
+.trail svg{color:var(--faint)}
+.trail .arrow{color:var(--faint)}
+.matchbadge{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:5px;font-weight:700}
+.matchbadge.exact,.matchbadge.normalized{background:var(--ok-dim);color:var(--ok)}
+.matchbadge.relocated{background:var(--warn-dim);color:var(--warn)}
+.matchbadge.not_found{background:var(--bad-dim);color:var(--bad)}
+.quotecard{position:relative;background:#0a0f18;border:1px solid var(--line2);border-left:3px solid var(--hl);
+  border-radius:0 var(--r-md) var(--r-md) 0;padding:12px 13px;margin-top:6px}
+.quotecard::before{content:"“";position:absolute;top:2px;left:8px;font-size:26px;color:var(--line2);
+  font-family:Georgia,serif;line-height:1}
+.quotecard .qtext{font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#d7e1f0;
+  white-space:pre-wrap;word-break:break-word;max-height:190px;overflow:auto;padding-left:12px}
+.noev{display:flex;align-items:center;gap:9px;color:var(--faint);font-size:12.5px;padding:10px 0}
+.reasons{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-direction:column;gap:6px}
+.reasons li{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--dim);line-height:1.5}
+.reasons li svg{flex:none;margin-top:2px}
+.reasons li.good svg{color:var(--ok)} .reasons li.bad svg{color:var(--bad)} .reasons li svg.neutral{color:var(--faint)}
+.acts{display:flex;gap:8px;margin-top:14px}
+.actbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:9px;
+  border:1px solid var(--line2);background:var(--panel2);color:var(--fg);cursor:pointer;
+  font-size:12.5px;font-weight:700;transition:.15s}
+.actbtn.accept{border-color:var(--ok-line);color:var(--ok)} .actbtn.accept:hover{background:var(--ok-dim)}
+.actbtn.reject{border-color:var(--bad-line);color:var(--bad)} .actbtn.reject:hover{background:var(--bad-dim)}
+.pgwrap{margin-top:14px;border:1px solid var(--line2);border-radius:var(--r-md);overflow:hidden;background:#1a1a1a}
+.pgwrap img{width:100%;display:block;background:#fff}
+.pgcap{padding:7px 11px;font-size:11px;color:var(--faint);background:var(--panel2);
+  border-top:1px solid var(--line);display:flex;justify-content:space-between}
+
+/* ---------- review queue ---------- */
+.qexplain{font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:14px}
+.qexplain b{color:var(--fg)}
+.qgrid{display:flex;flex-direction:column;gap:8px}
+.qitem{position:relative;padding:12px 13px 12px 16px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel);cursor:pointer;transition:.15s}
+.qitem::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px}
+.qitem:hover{border-color:var(--line2);background:var(--panel2)}
+.qitem.on{border-color:var(--accent);background:var(--panel3)}
+.qitem.risk-high::before{background:var(--bad)} .qitem.risk-med::before{background:var(--warn)} .qitem.risk-low::before{background:var(--faint)}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qtitle{font-size:13px;font-weight:700}
+.qtitle .attrname{color:var(--dim);font-weight:500}
+.riskchip{font-family:var(--mono);font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.riskchip.high{background:var(--bad-dim);color:var(--bad)} .riskchip.med{background:var(--warn-dim);color:var(--warn)} .riskchip.low{background:var(--panel3);color:var(--faint)}
+.qmeta{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11.5px;color:var(--faint)}
+.qmeta .qval{font-family:var(--mono);color:var(--fg);font-weight:700}
+
+/* ---------- evaluation ---------- */
+.wide{padding:24px 26px;overflow-y:auto;height:calc(100vh - 106px);max-width:1180px}
+.herostat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px}
+.herogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0 26px}
+.hero-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:700}
+.hero-vals{display:flex;align-items:baseline;gap:9px;margin-top:9px}
+.hero-old{font-family:var(--mono);font-size:14px;color:var(--faint);text-decoration:line-through;text-decoration-color:var(--line2)}
+.hero-new{font-family:var(--mono);font-size:24px;font-weight:800}
+.hero-new.better{color:var(--ok)} .hero-new.worse{color:var(--bad)}
+.hero-delta{font-size:11px;font-weight:700;margin-top:6px}
+.hero-delta.better{color:var(--ok)} .hero-delta.worse{color:var(--bad)}
+h2.sec{font-size:14px;font-weight:750;margin:30px 0 14px;display:flex;align-items:center;gap:8px}
+h2.sec svg{color:var(--accent2)}
+.subnote{font-size:12px;color:var(--dim);margin:-8px 0 16px;line-height:1.6;max-width:820px}
+.mt{width:100%;border-collapse:collapse;margin-bottom:8px;background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.mt th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);
+  font-weight:700;padding:9px 14px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.mt td{padding:9px 14px;border-bottom:1px solid var(--line);font-size:13px}
+.mt tr:last-child td{border-bottom:none}
 .mt .num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.win{color:var(--ok);font-weight:700} .lose{color:var(--bad)}
-.muted{color:var(--dim)}
-a{color:var(--accent)}
-.empty{color:var(--dim);padding:30px;text-align:center;font-size:13px}
+.win{color:var(--ok);font-weight:700} .lose{color:var(--bad);font-weight:700}
+.chartcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:24px}
+.barrow{display:grid;grid-template-columns:180px 1fr 56px;gap:10px;align-items:center;font-size:12px;padding:5px 0}
+.barrow .lbl{color:var(--dim);font-family:var(--mono);font-size:11px}
+.barrow .track{height:8px;background:var(--line);border-radius:4px;position:relative;overflow:visible}
+.barrow .fill{position:absolute;top:0;bottom:0;border-radius:4px}
+.barrow .fill.pos{background:linear-gradient(90deg,var(--accent2),var(--ok));left:50%}
+.barrow .fill.neg{background:var(--bad);right:50%}
+.barrow .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line2)}
+.barrow .num{font-family:var(--mono);text-align:right}
+
+/* ---------- shared ---------- */
+.muted{color:var(--dim)} .faint{color:var(--faint)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  color:var(--faint);padding:60px 20px;text-align:center;font-size:12.5px}
+.empty svg{opacity:.5}
+.empty b{color:var(--dim);font-size:13px;font-weight:600}
+.celebrate{color:var(--ok)}
+
+/* ---------- modal ---------- */
+.modalbg{position:fixed;inset:0;background:rgba(4,6,10,.7);backdrop-filter:blur(3px);z-index:50;
+  display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .18s}
+.modalbg.show{opacity:1;pointer-events:auto}
+.modal{background:var(--panel);border:1px solid var(--line2);border-radius:16px;max-width:640px;width:100%;
+  max-height:86vh;overflow-y:auto;box-shadow:var(--shadow);transform:translateY(8px);transition:transform .18s}
+.modalbg.show .modal{transform:translateY(0)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
+.modal-head b{font-size:15px}
+.modal-body{padding:20px 22px 24px}
+.modal-body p{font-size:13px;line-height:1.65;color:var(--dim);margin:0 0 14px}
+.flow{display:flex;align-items:stretch;gap:0;margin:16px 0 22px}
+.flowstep{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 10px;text-align:center}
+.flowstep svg{color:var(--accent2);margin-bottom:6px}
+.flowstep b{display:block;font-size:11.5px}
+.flowstep span{display:block;font-size:10px;color:var(--faint);margin-top:3px;line-height:1.4}
+.flowarrow{display:flex;align-items:center;padding:0 6px;color:var(--faint)}
+.legend{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.legend .row{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.legend .row .sample{flex:none}
+.legend .row span{color:var(--dim)}
+
+/* ---------- toasts ---------- */
+.toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:60}
+.toast{display:flex;align-items:center;gap:9px;background:var(--panel3);border:1px solid var(--line2);
+  border-radius:10px;padding:11px 15px;font-size:12.5px;box-shadow:var(--shadow);
+  animation:toastin .2s ease-out; max-width:340px}
+.toast.ok{border-color:var(--ok-line)} .toast.ok svg{color:var(--ok)}
+.toast.bad{border-color:var(--bad-line)} .toast.bad svg{color:var(--bad)}
+@keyframes toastin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- warm-up overlay ---------- */
+#warmbg{position:fixed;inset:0;background:var(--bg);z-index:80;display:flex;
+  align-items:center;justify-content:center;transition:opacity .35s ease}
+#warmbg.hide{opacity:0;pointer-events:none}
+.warmcard{max-width:420px;text-align:center;padding:0 24px}
+.spinner{width:44px;height:44px;margin:0 auto 20px;border-radius:50%;
+  border:3px solid var(--line2);border-top-color:var(--accent2);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.warmcard b{display:block;font-size:15px;margin-bottom:8px}
+.warmcard p{font-size:12.5px;color:var(--dim);line-height:1.6;margin:0}
+.warmcard .llmline{margin-top:14px;font-size:11.5px;color:var(--faint);font-family:var(--mono)}
 </style>
+
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16.5 16.5 20.5 12 22 C7.5 20.5 4 16.5 4 11 V5 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="8,12.5 11,15.5 16,9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><polygon points="12,3 22,20 2,20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.05" fill="currentColor"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15 2v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><line x1="9" y1="12.5" x2="16" y2="12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="9" y1="16" x2="16" y2="16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 12h4l2 3h4l2-3h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 12 6.5 4h11L20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><polygon points="13,2 3,14 11,14 9,22 21,10 13,10" fill="currentColor"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.4 1c0 1.6-2.6 1.8-2.6 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="currentColor"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12,3 21,8 12,13 3,8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><polyline points="3,13 12,18 21,13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M4 4 20 12 4 20 8 12 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><polyline points="12,7 12,12 16,14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs>
+</svg>
+
 <header>
-  <div class="logo">Spec<span>Ledger</span></div>
-  <div class="tag">Verifiable product intelligence · team Unisol</div>
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 32 32">
+      <polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="#122036" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 16.5 14.5 20 21.5 12" fill="none" stroke="#22d3ee" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs><linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6"/>
+      </linearGradient></defs>
+    </svg>
+    <div class="wordmark"><b>Spec<i>Ledger</i></b><span>Verifiable product intelligence · team Unisol</span></div>
+  </div>
+  <div class="llmpill" id="llmpill" title="LLM extractor status"><span class="dot"></span><span id="llmpilltext">checking…</span></div>
   <nav>
-    <button id="t-cat" class="on" onclick="tab('cat')">Catalog</button>
-    <button id="t-q" onclick="tab('q')">Review queue</button>
-    <button id="t-m" onclick="tab('m')">Evaluation</button>
+    <div class="segmented">
+      <button id="t-cat" class="on" onclick="tab('cat')">Catalog</button>
+      <button id="t-q" onclick="tab('q')">Review queue</button>
+      <button id="t-m" onclick="tab('m')">Evaluation</button>
+    </div>
+    <button class="iconbtn" onclick="openHelp()" title="How SpecLedger works"><svg width="16" height="16"><use href="#i-help"/></svg></button>
   </nav>
 </header>
+
 <div class="stats" id="stats"></div>
 
 <main id="v-cat">
-  <div class="col"><h3>Catalog</h3><div id="skus"></div></div>
-  <div class="col"><h3 id="rec-h">Record</h3><div id="rec"></div></div>
-  <div class="col"><h3>Evidence</h3><div id="ev"><div class="empty">Select an attribute to see the source sentence.</div></div></div>
+  <div class="col"><div class="colhead"><h3>Catalog</h3></div><div id="skus"></div></div>
+  <div class="col"><div class="colhead"><h3 id="rec-h">Record</h3></div><div id="rec"></div></div>
+  <div class="col"><div class="colhead"><h3>Evidence</h3></div><div id="ev">
+    <div class="empty"><svg width="34" height="34"><use href="#i-search"/></svg>
+      <b>No attribute selected</b>Click any attribute on the left to see the exact source sentence that justifies it.</div>
+  </div></div>
 </main>
 
 <main id="v-q" style="display:none">
-  <div class="col" style="grid-column:span 2"><h3>Ranked by risk = uncertainty × safety × conflict</h3><div id="queue"></div></div>
-  <div class="col"><h3>Evidence</h3><div id="qev"><div class="empty">Select a queued item.</div></div></div>
+  <div class="col" style="grid-column:span 2">
+    <div class="colhead"><h3>Review queue</h3></div>
+    <div class="qexplain">Ranked by <b>risk = uncertainty × safety weight × conflict weight</b> — items where a wrong
+      value would do the most damage float to the top, not items that simply arrived first.</div>
+    <div class="qgrid" id="queue"></div>
+  </div>
+  <div class="col"><div class="colhead"><h3>Evidence</h3></div><div id="qev">
+    <div class="empty"><svg width="34" height="34"><use href="#i-inbox"/></svg>
+      <b>No item selected</b>Pick a queued attribute to review its evidence.</div>
+  </div></div>
 </main>
 
 <div class="wide" id="v-m" style="display:none"><div id="metrics"></div></div>
 
+<div class="modalbg" id="helpbg" onclick="if(event.target===this)closeHelp()">
+  <div class="modal">
+    <div class="modal-head"><b>How SpecLedger works</b>
+      <button class="iconbtn" onclick="closeHelp()"><svg width="15" height="15"><use href="#i-close"/></svg></button></div>
+    <div class="modal-body">
+      <p>Industrial distributors start with almost nothing — a part number, a brand, a one-line description —
+        and need a full, trustworthy spec sheet. SpecLedger turns that thin input into a commerce-ready record
+        where <b style="color:var(--fg)">every value cites the exact sentence it came from</b>, so a human never has
+        to take an AI's word for it.</p>
+      <div class="flow">
+        <div class="flowstep"><svg width="20" height="20"><use href="#i-doc"/></svg><b>Ingest</b><span>Read source PDFs with exact character offsets</span></div>
+        <div class="flowarrow"><svg width="14" height="14"><use href="#i-send"/></svg></div>
+        <div class="flowstep"><svg width="20" height="20"><use href="#i-scan"/></svg><b>Extract</b><span>Regex + table logic + LLM propose values</span></div>
+        <div class="flowarrow"><svg width="14" height="14"><use href="#i-send"/></svg></div>
+        <div class="flowstep"><svg width="20" height="20"><use href="#i-lock"/></svg><b>Verify</b><span>Every quote re-checked against the raw document</span></div>
+        <div class="flowarrow"><svg width="14" height="14"><use href="#i-send"/></svg></div>
+        <div class="flowstep"><svg width="20" height="20"><use href="#i-check-circle"/></svg><b>Publish</b><span>Auto-publish only above a calibrated confidence floor</span></div>
+      </div>
+      <p style="margin-bottom:8px"><b style="color:var(--fg)">Reading the badges:</b></p>
+      <div class="legend">
+        <div class="row"><span class="pill AUTO_PUBLISH sample"><span class="dot"></span>AUTO PUBLISH</span><span>Confidence cleared the precision floor — safe to publish unreviewed.</span></div>
+        <div class="row"><span class="pill REVIEW sample"><span class="dot"></span>REVIEW</span><span>Below the floor, conflicting sources, or a physics rule was violated — routed to a human.</span></div>
+        <div class="row"><span class="pill REJECT sample"><span class="dot"></span>REJECT</span><span>No candidate survived the evidence gate.</span></div>
+        <div class="row"><svg class="sample safeicon" width="16" height="16"><use href="#i-shield"/></svg><span>Safety-critical attribute — held to a stricter precision floor (a wrong voltage/current rating is a physical hazard).</span></div>
+        <div class="row"><span class="chip warn sample">conflict: 1 V</span><span>Two sources disagree — always routed to review, never silently resolved.</span></div>
+        <div class="row"><span class="matchbadge exact sample">exact</span><span>The cited quote matches the source document byte-for-byte.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<div id="warmbg">
+  <div class="warmcard">
+    <div class="spinner"></div>
+    <b>Enriching the catalog…</b>
+    <p>Ingesting source datasheets, resolving series-table columns, verifying every
+      citation against the raw document, and calibrating confidence. This runs once
+      per server start.</p>
+    <div class="llmline" id="warmllm">checking LLM extractor…</div>
+  </div>
+</div>
+
 <script>
 const $=(s)=>document.querySelector(s), api=(p)=>fetch(p).then(r=>r.json());
 let RECS=[], CUR=null, CURATTR=null;
+const pct=(x)=> x==null ? '—' : (100*x).toFixed(1)+'%';
+const esc=(s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function confColor(a){
+  if(a.decision==='AUTO_PUBLISH') return 'var(--ok)';
+  if(a.decision==='REVIEW') return 'var(--warn)';
+  return 'var(--bad)';
+}
+function riskBand(r){ return r>=1.2?'high':r>=0.5?'med':'low'; }
+
+function openHelp(){ $('#helpbg').classList.add('show'); }
+function closeHelp(){ $('#helpbg').classList.remove('show'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeHelp(); });
+
+function toast(msg, kind='ok'){
+  const el=document.createElement('div');
+  el.className='toast '+kind;
+  el.innerHTML=`<svg width="16" height="16"><use href="#i-${kind==='ok'?'check-circle':'x-circle'}"/></svg><span>${esc(msg)}</span>`;
+  $('#toasts').appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .25s, transform .25s'; el.style.opacity='0'; el.style.transform='translateY(6px)';
+    setTimeout(()=>el.remove(),260); }, 2600);
+}
 
 function tab(t){
   for(const k of ['cat','q','m']){
@@ -122,102 +425,203 @@ function tab(t){
   if(t==='q') loadQueue();
   if(t==='m') loadMetrics();
 }
-const pct=(x)=> (100*x).toFixed(1)+'%';
+
+const statIcon = {
+  records:'i-layers', attributes:'i-doc', 'auto-published':'i-check-circle',
+  'in review':'i-clock', 'conflicts flagged':'i-alert', 'multi-source':'i-layers',
+  provenance:'i-lock'
+};
+
+async function waitUntilReady(){
+  while(true){
+    let r;
+    try{ r = await api('/api/ready'); } catch(e){ await new Promise(res=>setTimeout(res,1200)); continue; }
+    const llm = r.llm_extractor||{};
+    $('#warmllm').textContent = llm.enabled ? `${llm.label} — live calls in progress`
+                                            : (llm.label || 'deterministic extractors only');
+    if(r.ready) break;
+    await new Promise(res=>setTimeout(res,1200));
+  }
+  $('#warmbg').classList.add('hide');
+  setTimeout(()=>$('#warmbg')?.remove(), 400);
+}
 
 async function boot(){
+  await waitUntilReady();
   const h = await api('/api/health'); const c = h.catalog||{};
-  $('#stats').innerHTML = [
+  const llm = h.llm_extractor || {};
+  const pillEl = $('#llmpill');
+  pillEl.classList.toggle('live', !!llm.enabled);
+  const shortLabel = !llm.enabled ? 'LLM offline'
+    : llm.backend==='bedrock' ? 'Nova Lite live' : 'LLM live';
+  $('#llmpilltext').textContent = shortLabel;
+  pillEl.title = llm.enabled
+    ? `Live: ${llm.label}. Real API calls join the deterministic extractor panel.`
+    : `${llm.label||'No credentials configured'}. Deterministic extractors (table/range/regex) still run fully offline.`;
+
+  const rows = [
     ['records', c.records], ['attributes', c.attributes],
     ['auto-published', c.auto_published], ['in review', c.in_review],
     ['conflicts flagged', c.conflicting], ['multi-source', c.multi_source],
-    ['provenance', pct(c.provenance_coverage||0)],
-    ['LLM extractor', h.llm_extractor]
-  ].map(([k,v])=>`<div class="stat"><b>${v??'—'}</b><i>${k}</i></div>`).join('');
+    ['provenance', pct(c.provenance_coverage)],
+  ];
+  $('#stats').innerHTML = rows.map(([k,v])=>
+    `<div class="stat${k==='provenance'?' accent':''}"><svg width="14" height="14"><use href="#${statIcon[k]||'i-doc'}"/></svg>
+      <b>${v??'—'}</b><i>${k}</i></div>`).join('');
+
   RECS = await api('/api/records');
-  $('#skus').innerHTML = RECS.map(r=>`
-    <div class="sku" id="s-${r.sku}" onclick="openSku('${r.sku}')">
-      <div class="id">${r.mpn}</div>
-      <div class="meta">${r.brand} · ${r.published}/${r.attributes} published${r.conflicts?` · ${r.conflicts}⚠`:''}</div>
-    </div>`).join('');
+  $('#skus').innerHTML = RECS.map(r=>{
+    const frac = r.attributes ? r.published/r.attributes : 0;
+    return `<div class="skucard" id="s-${r.sku}" onclick="openSku('${r.sku}')">
+      <div class="top"><span class="id">${esc(r.mpn)}</span><span class="brand">${esc(r.brand)}</span></div>
+      <div class="meta">
+        <div class="mini-bar"><i style="width:${(frac*100).toFixed(0)}%"></i></div>
+        <span class="frac">${r.published}/${r.attributes}</span>
+      </div>
+      ${r.conflicts ? `<div class="warnpip" style="margin-top:6px"><svg width="11" height="11"><use href="#i-alert"/></svg>${r.conflicts} conflict${r.conflicts>1?'s':''}</div>` : ''}
+    </div>`;
+  }).join('');
   if(RECS.length) openSku(RECS[0].sku);
 }
 
 async function openSku(sku){
   CUR=sku;
-  document.querySelectorAll('.sku').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.skucard').forEach(e=>e.classList.remove('on'));
   $('#s-'+sku)?.classList.add('on');
   const r = await api('/api/records/'+sku);
-  $('#rec-h').textContent = `${r.brand} ${r.mpn} — ${r.product_class.replace(/_/g,' ').toLowerCase()}`;
-  const rows = Object.entries(r.attributes).map(([k,a])=>`
-    <tr class="row" id="a-${k}" onclick="showEv('${sku}','${k}')">
-      <td>${a.label}${a.safety_critical?'<span class="crit" title="safety-critical">▲</span>':''}
-          <div class="k">${k}</div></td>
-      <td class="val">${a.display||'—'}
-          ${a.conflicting?`<div class="chip warn">conflict: ${(a.conflict_values||[]).slice(0,2).join(' / ')}</div>`:''}</td>
-      <td><span class="badge ${a.decision}">${a.decision.replace('_',' ')}</span>
-          <div class="bar"><i style="width:${(100*a.confidence).toFixed(0)}%"></i></div>
-          <div class="k">${a.confidence.toFixed(3)}</div></td>
-    </tr>`).join('');
+  $('#rec-h').textContent = `${r.brand} ${r.mpn}`;
+
+  const score = r.readiness.score;
+  const band = score>=80?'var(--ok)':score>=50?'var(--warn)':'var(--bad)';
+  const circ = 2*Math.PI*18, off = circ*(1-score/100);
+
+  const rowsHtml = Object.entries(r.attributes).map(([k,a])=>{
+    const conf = Math.max(0, Math.min(1, a.confidence));
+    return `<div class="attr" id="a-${k}" onclick="showEv('${sku}','${k}')">
+      <div class="name-wrap">
+        <div class="name">${a.safety_critical?`<svg class="safeicon" width="14" height="14"><use href="#i-shield"/></svg>`:''}${esc(a.label)}</div>
+        <div class="key">${k}</div>
+      </div>
+      <div class="valcol">
+        <div class="val">${esc(a.display)||'—'}</div>
+        ${a.conflicting?`<div class="conflictnote">↯ conflicts: ${(a.conflict_values||[]).slice(0,2).map(esc).join(' / ')}</div>`:''}
+      </div>
+      <div class="deccol">
+        <span class="pill ${a.decision}"><span class="dot"></span>${a.decision.replace('_',' ')}</span>
+        <div class="confbar"><i style="width:${(conf*100).toFixed(0)}%;background:${confColor(a)}"></i></div>
+        <span class="confnum">${a.confidence.toFixed(3)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
   $('#rec').innerHTML = `
-    <div class="ev"><span class="k">input</span><div style="margin-top:4px">“${r.input_description}”</div>
-      <div style="margin-top:8px">${r.docs.map(d=>`<span class="chip">${d.publisher}</span>`).join('')}</div>
-      <div style="margin-top:8px"><span class="k">AI-search readiness</span>
-        <b style="margin-left:6px">${r.readiness.score}</b>
-        <span class="muted">/100 · ${r.readiness.attributes_published} published, ${r.readiness.attributes_withheld} withheld</span></div>
-      ${(r.notes||[]).map(n=>`<div class="k" style="margin-top:6px;color:var(--warn)">${n}</div>`).join('')}
+    <div class="card">
+      <h3 style="margin-bottom:6px">customer-supplied input</h3>
+      <div class="inputquote">“${esc(r.input_description)}”</div>
+      <div class="chiprow">
+        ${r.docs.map(d=>`<span class="chip"><svg width="11" height="11"><use href="#i-doc"/></svg>${esc(d.publisher)}</span>`).join('')}
+      </div>
+      ${(r.notes||[]).map(n=>`<div class="callout ${/no evidence/i.test(n)?'warn':'info'}">
+          <svg width="15" height="15"><use href="#i-alert"/></svg><span>${esc(n)}</span></div>`).join('')}
+      <div class="readyrow">
+        <div class="gauge">
+          <svg viewBox="0 0 44 44">
+            <circle class="bg" cx="22" cy="22" r="18"/>
+            <circle class="fg" cx="22" cy="22" r="18" style="stroke:${band};stroke-dasharray:${circ};stroke-dashoffset:${off}"/>
+          </svg>
+          <span class="num">${score}</span>
+        </div>
+        <div class="readytext">
+          <b>AI-search readiness</b>
+          <span>${r.readiness.attributes_published} published · ${r.readiness.attributes_withheld} withheld from feeds</span>
+        </div>
+      </div>
     </div>
-    <table><tr><th>attribute</th><th>value</th><th>decision</th></tr>${rows}</table>`;
+    <div class="attrlist">${rowsHtml}</div>`;
+}
+
+function reasonIcon(x){
+  if(/auto-published|agree|column|resolved|section/.test(x)) return {cls:'good', icon:'i-check-circle'};
+  if(/conflict|quarantin|violation|rejected|reject/.test(x)) return {cls:'bad', icon:'i-x-circle'};
+  return {cls:'', icon:'i-clock'};
 }
 
 async function showEv(sku, attr, target='#ev'){
   CURATTR=attr;
-  document.querySelectorAll('tr.row').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.attr').forEach(e=>e.classList.remove('on'));
   $('#a-'+attr)?.classList.add('on');
   const r = await api('/api/records/'+sku); const a = r.attributes[attr];
   const e = a.evidence;
+
+  const trail = e ? `<div class="trail">
+      <span class="seg"><svg width="13" height="13"><use href="#i-doc"/></svg>${esc(e.doc_id)}</span>
+      <span class="arrow">→</span><span class="seg">page ${e.page}</span>
+      <span class="arrow">→</span><span class="seg">chars ${e.char_start}–${e.char_end}</span>
+      <span class="matchbadge ${e.match_mode}">${e.match_mode}</span>
+    </div>
+    <div class="quotecard"><div class="qtext">${esc(e.quote)}</div></div>`
+    : `<div class="noev"><svg width="16" height="16"><use href="#i-x-circle"/></svg>No evidence — nothing survived the verification gate for this attribute.</div>`;
+
   const why = (a.reasons||[]).map(x=>{
-    const cls = /auto-published|agree|column|section/.test(x) ? 'good'
-              : /conflict|quarantin|violation|rejected/.test(x) ? 'bad' : '';
-    return `<li class="${cls}">${x}</li>`;
+    const {cls,icon} = reasonIcon(x);
+    return `<li class="${cls}"><svg width="13" height="13" class="${cls?'':'neutral'}"><use href="#${icon}"/></svg><span>${esc(x)}</span></li>`;
   }).join('');
+
+  const quarantine = a.quarantined?.length ? `<div class="callout warn">
+      <svg width="15" height="15"><use href="#i-alert"/></svg>
+      <span>Quarantined: evidence window named an unrelated part (${a.quarantined.map(esc).join(', ')}) — likely a sibling-product mention, not a spec for this part.</span></div>` : '';
+  const rejectedProv = a.rejected_provenance?.length ? a.rejected_provenance.map(q=>
+      `<div class="callout warn"><svg width="15" height="15"><use href="#i-x-circle"/></svg><span>${esc(q)}</span></div>`).join('') : '';
+
   $(target).innerHTML = `
-    <div class="ev">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <b>${a.label}</b><span class="badge ${a.decision}">${a.decision.replace('_',' ')}</span>
+    <div class="card">
+      <div class="evhead">
+        <div><div class="evname">${esc(a.label)}</div><div class="evkey">${attr}</div></div>
+        <span class="pill ${a.decision}"><span class="dot"></span>${a.decision.replace('_',' ')}</span>
       </div>
-      <div class="val" style="font-size:20px;margin:6px 0">${a.display||'—'}</div>
-      ${e?`<div class="k">${e.doc_id} · page ${e.page} · chars ${e.char_start}–${e.char_end} · match ${e.match_mode}</div>
-           <div class="quote">${(e.quote||'').replace(/</g,'&lt;')}</div>`:'<div class="muted">no evidence</div>'}
-      ${a.quarantined?.length?`<div style="margin-top:8px"><span class="k">quarantined</span>
-          ${a.quarantined.map(q=>`<span class="chip warn">${q}</span>`).join('')}</div>`:''}
-      ${a.rejected_provenance?.length?`<div style="margin-top:6px">${a.rejected_provenance
-          .map(q=>`<div class="k" style="color:var(--warn)">✕ ${q}</div>`).join('')}</div>`:''}
-      <ul class="why">${why}</ul>
+      <div class="evval">${esc(a.display)||'—'}</div>
+      ${trail}
+      ${quarantine}${rejectedProv}
+      <ul class="reasons">${why}</ul>
       <div class="acts">
-        <button class="a" onclick="act('${sku}','${attr}','ACCEPT')">Accept</button>
-        <button class="r" onclick="act('${sku}','${attr}','REJECT')">Reject</button>
+        <button class="actbtn accept" onclick="act('${sku}','${attr}','ACCEPT')"><svg width="14" height="14"><use href="#i-check-circle"/></svg>Accept</button>
+        <button class="actbtn reject" onclick="act('${sku}','${attr}','REJECT')"><svg width="14" height="14"><use href="#i-x-circle"/></svg>Reject</button>
       </div>
     </div>
-    ${e?`<img class="pg" src="/api/evidence/${sku}/${attr}.png" alt="source page ${e.page} with the supporting sentence highlighted">`:''}`;
+    ${e?`<div class="pgwrap">
+        <img src="/api/evidence/${sku}/${attr}.png" alt="source page ${e.page} with the supporting sentence highlighted">
+        <div class="pgcap"><span>${esc(e.doc_id)}</span><span>page ${e.page}</span></div>
+      </div>`:''}`;
 }
 
 async function act(sku, attribute, action){
   await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({sku,attribute,action,actor:'demo-reviewer'})});
-  await openSku(sku); await showEv(sku,attribute); loadQueue();
+  toast(action==='ACCEPT' ? `Accepted ${attribute.replace(/_/g,' ')} for ${sku}` : `Rejected ${attribute.replace(/_/g,' ')} for ${sku}`,
+        action==='ACCEPT' ? 'ok' : 'bad');
+  await openSku(sku); await showEv(sku,attribute);
+  const skus = await api('/api/records'); RECS = skus;
+  loadQueue();
 }
 
 async function loadQueue(){
   const q = await api('/api/queue');
-  $('#queue').innerHTML = q.length ? q.map((i,n)=>`
-    <div class="qitem" id="q-${n}" onclick="pickQ(${n},'${i.sku}','${i.attribute}')">
-      <span class="risk">risk ${i.risk.toFixed(2)}</span>
-      <b>${i.brand} ${i.mpn}</b> — ${i.attribute}
-      ${i.safety_critical?'<span class="crit">▲ safety-critical</span>':''}
-      <div class="k" style="margin-top:4px">proposed <span class="val">${i.display||'—'}</span>
-        ${i.conflicting?` · conflicts with ${i.conflict_values.slice(0,2).join(' / ')}`:''}
-        · confidence ${i.confidence.toFixed(3)}</div>
-    </div>`).join('') : '<div class="empty">Queue is clear — everything cleared the precision floor.</div>';
+  $('#queue').innerHTML = q.length ? q.map((i,n)=>{
+    const band = riskBand(i.risk);
+    return `<div class="qitem risk-${band}" id="q-${n}" onclick="pickQ(${n},'${i.sku}','${i.attribute}')">
+      <div class="qtop">
+        <div class="qtitle">${esc(i.brand)} ${esc(i.mpn)} <span class="attrname">— ${i.attribute.replace(/_/g,' ')}</span></div>
+        <span class="riskchip ${band}">risk ${i.risk.toFixed(2)}</span>
+      </div>
+      <div class="qmeta">
+        ${i.safety_critical?`<svg class="safeicon" width="13" height="13"><use href="#i-shield"/></svg>`:''}
+        <span>proposed <span class="qval">${esc(i.display)||'—'}</span></span>
+        ${i.conflicting?`<span>· conflicts: ${(i.conflict_values||[]).slice(0,2).map(esc).join(' / ')}</span>`:''}
+        <span>· confidence ${i.confidence.toFixed(3)}</span>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty celebrate"><svg width="36" height="36"><use href="#i-check-circle"/></svg>
+      <b>Queue is clear</b>Everything that could be verified cleared the precision floor.</div>`;
 }
 function pickQ(n,sku,attr){
   document.querySelectorAll('.qitem').forEach(e=>e.classList.remove('on'));
@@ -226,18 +630,76 @@ function pickQ(n,sku,attr){
 }
 
 async function loadMetrics(){
-  const m = await api('/api/metrics');
-  if(m.error){ $('#metrics').innerHTML=`<div class="empty">${m.error}</div>`; return; }
-  const [n,s]=m.arms;
+  const [m, h] = await Promise.all([api('/api/metrics'), api('/api/health')]);
+  if(m.error){
+    $('#metrics').innerHTML = `<div class="empty"><svg width="34" height="34"><use href="#i-search"/></svg>
+      <b>No evaluation run yet</b>Run <code>make eval</code> from the repo root, then reload this tab.</div>`;
+    return;
+  }
+  const [n,s] = m.arms;
+  const deltaAttrs = s.attributes_labelled - n.attributes_labelled;
+  const thresholds = (h.thresholds)||{};
+
+  const heroRow = (label, a, b, fmt, betterIsHigher=true) => {
+    const av = fmt(a), bv = fmt(b);
+    const better = betterIsHigher ? b>=a : b<=a;
+    const delta = a!=null && b!=null ? (b-a) : null;
+    const deltaTxt = delta==null ? '' : (delta>=0?'+':'') + (Math.abs(delta)<1 ? (delta*100).toFixed(1)+' pts' : delta.toFixed(2));
+    return `<div class="herostat">
+      <div class="hero-label">${label}</div>
+      <div class="hero-vals"><span class="hero-old">${av}</span><span class="hero-new ${better?'better':'worse'}">${bv}</span></div>
+      <div class="hero-delta ${better?'better':'worse'}">${deltaTxt} vs naive</div>
+    </div>`;
+  };
+
   const row=(k,a,b,better)=>{
     const cls = better==='b'?'win':better==='a'?'lose':'';
     return `<tr><td>${k}</td><td class="num muted">${a}</td><td class="num ${cls}">${b}</td></tr>`;};
+
   const curve = m.risk_coverage_curve.filter((p,i,arr)=>p.coverage>0 &&
       (i===0 || Math.abs(p.coverage-arr[i-1].coverage)>0.01));
-  const W=560,H=180;
-  const pts = curve.map(p=>`${20+(W-40)*p.coverage},${H-20-(H-40)*((p.precision-0.9)/0.1)}`).join(' ');
-  $('#metrics').innerHTML=`
-    <h3>Measured on ${m.corpus.skus} SKUs across ${m.corpus.documents} real vendor datasheets</h3>
+  const W=620,H=210,PAD=34;
+  const x = c => PAD+(W-PAD-14)*c;
+  const y = p => H-PAD-(H-PAD-16)*((p-0.85)/0.15);
+  const pts = curve.map(p=>`${x(p.coverage).toFixed(1)},${y(p.precision).toFixed(1)}`).join(' ');
+  const area = `${x(curve[0].coverage).toFixed(1)},${(H-PAD).toFixed(1)} ${pts} ${x(curve[curve.length-1].coverage).toFixed(1)},${(H-PAD).toFixed(1)}`;
+  const gridY = [0.85,0.90,0.95,1.0];
+  const threshMarks = ['general','safety'].filter(k=>thresholds[k]!=null).map(k=>{
+    const pt = curve.reduce((best,c)=>Math.abs(c.threshold-thresholds[k])<Math.abs(best.threshold-thresholds[k])?c:best, curve[0]);
+    return {k, x:x(pt.coverage)};
+  });
+
+  $('#metrics').innerHTML = `
+    <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div><h2 class="sec" style="margin-top:0"><svg width="16" height="16"><use href="#i-layers"/></svg>Naive extraction vs. SpecLedger</h2>
+      <div class="subnote" style="margin-top:-8px">Measured on ${m.corpus.skus} SKUs across ${m.corpus.documents} real vendor
+        datasheets (${(m.corpus.product_classes||[]).join(', ')}), graded against a hand-transcribed gold set. Both arms
+        run the identical inputs and documents — this is not a synthetic comparison.</div></div>
+    </div>
+
+    <div class="herogrid">
+      ${heroRow('Precision on published', n.precision_on_published, s.precision_on_published, pct)}
+      ${heroRow('Safety-critical precision', n.safety_precision_on_published, s.safety_precision_on_published, pct)}
+      ${heroRow('Wrong values published', n.wrong_values_published, s.wrong_values_published, v=>v, false)}
+      ${heroRow('Calibration error (ECE)', n.ece, s.ece, v=>v?.toFixed?.(3)??v, false)}
+    </div>
+    <div class="callout info" style="max-width:820px;margin-bottom:22px">
+      <svg width="16" height="16"><use href="#i-scan"/></svg>
+      <span><b style="color:var(--fg)">Auto-publish rate isn't in the hero row on purpose.</b> Naive publishes
+      ${pct(n.auto_publish_rate)} of everything it finds — that isn't a strength, it's the absence of a check.
+      SpecLedger publishes ${pct(s.auto_publish_rate)} and routes the rest to review deliberately. A lower number
+      here is the system doing its job, not a regression — see the full table and frontier below for the actual trade-off.</span>
+    </div>
+
+    ${deltaAttrs>0 ? `<div class="callout info" style="max-width:820px;margin-bottom:22px">
+      <svg width="16" height="16"><use href="#i-bolt"/></svg>
+      <span><b style="color:var(--fg)">The LLM extractor added real coverage.</b> SpecLedger graded
+      ${s.attributes_labelled} attributes against naive's ${n.attributes_labelled} — <b style="color:var(--ok)">${deltaAttrs} more</b>,
+      recovered from free-narrative sentences (no table, no label/value line) that the deterministic
+      extractors structurally cannot anchor on. It ran gated by the identical evidence-verification
+      path as everything else: ${h.llm_extractor?.label||'the LLM extractor'}.</span></div>` : ''}
+
+    <h2 class="sec"><svg width="16" height="16"><use href="#i-doc"/></svg>Head-to-head</h2>
     <table class="mt">
       <tr><th>metric</th><th class="num">naive extraction</th><th class="num">SpecLedger</th></tr>
       ${row('attributes graded', n.attributes_labelled, s.attributes_labelled)}
@@ -245,29 +707,51 @@ async function loadMetrics(){
       ${row('auto-publish rate', pct(n.auto_publish_rate), pct(s.auto_publish_rate))}
       ${row('precision on published', pct(n.precision_on_published), pct(s.precision_on_published),'b')}
       ${row('safety-critical precision', pct(n.safety_precision_on_published), pct(s.safety_precision_on_published),'b')}
-      ${row('WRONG values published', n.wrong_values_published, s.wrong_values_published,'b')}
+      ${row('wrong values published', n.wrong_values_published, s.wrong_values_published,'b')}
       ${row('queued for human review', n.queued_for_review, s.queued_for_review)}
       ${row('calibration error (ECE)', n.ece, s.ece,'b')}
     </table>
-    <h3>Risk–coverage frontier — the knob a distributor actually turns</h3>
-    <svg width="${W}" height="${H}" style="background:var(--panel);border:1px solid var(--line);border-radius:8px">
-      <polyline points="${pts}" fill="none" stroke="var(--cyan)" stroke-width="2"/>
-      ${curve.map(p=>`<circle cx="${20+(W-40)*p.coverage}" cy="${H-20-(H-40)*((p.precision-0.9)/0.1)}" r="3" fill="var(--accent)"><title>coverage ${pct(p.coverage)} · precision ${pct(p.precision)}</title></circle>`).join('')}
-      <text x="20" y="${H-4}" fill="var(--dim)" font-size="10">coverage →</text>
-      <text x="20" y="12" fill="var(--dim)" font-size="10">precision 100%</text>
-      <text x="20" y="${H-24}" fill="var(--dim)" font-size="10">90%</text>
-    </svg>
-    <table class="mt" style="margin-top:20px">
+
+    <h2 class="sec"><svg width="16" height="16"><use href="#i-scan"/></svg>Risk–coverage frontier</h2>
+    <div class="subnote">The knob a distributor actually turns: raise the confidence threshold, publish less but
+      more safely. Dashed markers show the thresholds the calibrator actually picked for this run.</div>
+    <div class="chartcard">
+      <svg width="${W}" height="${H}">
+        ${gridY.map(g=>`<line x1="${PAD}" y1="${y(g)}" x2="${W-14}" y2="${y(g)}" stroke="var(--line)" stroke-width="1"/>
+          <text x="4" y="${y(g)+3}" fill="var(--faint)" font-size="9.5" font-family="var(--mono)">${(g*100).toFixed(0)}%</text>`).join('')}
+        <polygon points="${area}" fill="url(#areaGrad)"/>
+        <polyline points="${pts}" fill="none" stroke="var(--accent2)" stroke-width="2.2"/>
+        ${threshMarks.map(t=>`<line x1="${t.x}" y1="14" x2="${t.x}" y2="${H-PAD}" stroke="${t.k==='safety'?'var(--bad)':'var(--warn)'}" stroke-width="1.2" stroke-dasharray="3 3"/>
+          <text x="${t.x+4}" y="20" fill="${t.k==='safety'?'var(--bad)':'var(--warn)'}" font-size="9.5" font-family="var(--mono)">${t.k}</text>`).join('')}
+        ${curve.map(p=>`<circle cx="${x(p.coverage).toFixed(1)}" cy="${y(p.precision).toFixed(1)}" r="3.2" fill="var(--accent)" stroke="#0a0f18" stroke-width="1.5"><title>threshold ${p.threshold} · coverage ${pct(p.coverage)} · precision ${pct(p.precision)}</title></circle>`).join('')}
+        <text x="${PAD}" y="${H-8}" fill="var(--faint)" font-size="10">coverage →</text>
+        <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--accent2)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent2)" stop-opacity="0"/>
+        </linearGradient></defs>
+      </svg>
+    </div>
+    <table class="mt" style="max-width:520px">
       <tr><th>threshold</th><th class="num">coverage</th><th class="num">precision</th></tr>
       ${curve.map(p=>`<tr><td class="num">${p.threshold.toFixed(2)}</td>
         <td class="num">${pct(p.coverage)}</td><td class="num">${pct(p.precision)}</td></tr>`).join('')}
     </table>
-    ${m.errors_published_by_specledger?.length?`<h3>Errors SpecLedger still published (full disclosure)</h3>
+
+    ${m.errors_published_by_specledger?.length?`
+      <h2 class="sec"><svg width="16" height="16"><use href="#i-alert"/></svg>Full disclosure — errors SpecLedger still published</h2>
+      <div class="subnote">Reported on purpose, not tuned away. Trust comes from what a system admits, not just what it claims.</div>
       <table class="mt">${m.errors_published_by_specledger.map(e=>`<tr><td>${e.sku}</td><td>${e.attribute}</td>
-      <td class="num lose">${e.got}</td><td class="num muted">gold ${JSON.stringify(e.gold)}</td></tr>`).join('')}</table>`:''}
-    <h3>Learned feature weights</h3>
-    <table class="mt">${Object.entries(m.feature_weights||{}).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))
-      .map(([k,v])=>`<tr><td>${k}</td><td class="num ${v>0?'win':'lose'}">${v>0?'+':''}${v}</td></tr>`).join('')}</table>`;
+      <td class="num lose">${esc(e.got)}</td><td class="num muted">gold ${JSON.stringify(e.gold)}</td></tr>`).join('')}</table>`:''}
+
+    <h2 class="sec"><svg width="16" height="16"><use href="#i-layers"/></svg>Learned feature weights</h2>
+    <div class="subnote">What the calibrator actually learned drives confidence — positive weights raise it, negative weights lower it.</div>
+    <div class="chartcard">
+      ${Object.entries(m.feature_weights||{}).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).map(([k,v])=>{
+        const w = Math.min(50, Math.abs(v)/3*50);
+        return `<div class="barrow"><span class="lbl">${k}</span>
+          <div class="track"><span class="mid"></span><span class="fill ${v>=0?'pos':'neg'}" style="width:${w}%"></span></div>
+          <span class="num ${v>=0?'win':'lose'}">${v>0?'+':''}${v}</span></div>`;
+      }).join('')}
+    </div>`;
 }
 boot();
 </script>

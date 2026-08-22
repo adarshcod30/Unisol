@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
+import threading
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -31,16 +32,45 @@ from specledger.store import (audit_trail, catalog_health, connect,     # noqa: 
 app = FastAPI(title="SpecLedger", version=config.PIPELINE_VERSION)
 WEB = Path(__file__).resolve().parent.parent / "web"
 _STATE: dict = {}
+_STATE_LOCK = threading.Lock()
+_MODEL = None
 
 
-def state():
-    if "records" not in _STATE:
-        model = ConfidenceModel.load()
+def _model():
+    """The confidence model alone -- no enrichment. Cheap, used by /api/health
+    and /api/ready so status checks never block on a live LLM pass."""
+    global _MODEL
+    if _MODEL is None:
+        _MODEL = ConfidenceModel.load()
+    return _MODEL
+
+
+def _warm():
+    """Runs the full enrichment once, off the request path. With the LLM
+    extractor live (self-consistency sampling against real Bedrock calls) this
+    can take minutes on 12 SKUs, so it is kicked off at process startup in a
+    background thread rather than blocking whichever request happens to be
+    first -- the frontend polls /api/ready and shows a real progress state
+    instead of hanging with no explanation."""
+    with _STATE_LOCK:
+        if "records" in _STATE:
+            return
+        model = _model()
         recs = enrich_all(model=model)
         save_records(recs)
         _STATE["records"] = {r.sku: r for r in recs}
         _STATE["model"] = model
+
+
+def state():
+    if "records" not in _STATE:
+        _warm()
     return _STATE
+
+
+@app.on_event("startup")
+def _start_warming():
+    threading.Thread(target=_warm, daemon=True).start()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -48,18 +78,42 @@ def cockpit():
     return (WEB / "index.html").read_text()
 
 
+def _llm_status():
+    # config.llm_available() is called fresh here, not the LLM_AVAILABLE constant
+    # baked in at process start -- otherwise the cockpit shows "disabled" forever
+    # after a key is added to .env until someone remembers the server needs a
+    # restart to re-read it.
+    live = config.llm_available()
+    if live and config.LLM_BACKEND == "bedrock":
+        label = f"Amazon Nova Lite via Bedrock ({config.AWS_REGION})"
+    elif live:
+        label = f"{config.LLM_MODEL or 'Claude'} via Anthropic API"
+    elif config.LLM_BACKEND == "bedrock":
+        label = "no AWS credentials in .env"
+    else:
+        label = "no ANTHROPIC_API_KEY in .env"
+    return {"enabled": live, "backend": config.LLM_BACKEND, "label": label}
+
+
+@app.get("/api/ready")
+def ready():
+    """Cheap, non-blocking: never touches enrichment. The frontend polls this
+    while the background warm-up runs so the first paint is never a hang."""
+    return {"ready": "records" in _STATE, "llm_extractor": _llm_status()}
+
+
 @app.get("/api/health")
 def health():
-    st = state()
-    m = st["model"]
+    m = _model()
     return {
         "pipeline_version": config.PIPELINE_VERSION,
-        "llm_extractor": "enabled" if config.LLM_AVAILABLE else "disabled (no API key)",
+        "llm_extractor": _llm_status(),
         "catalog": catalog_health(),
         "calibration": m.metrics or {"note": "cold-start prior (run `make eval` to fit)"},
         "thresholds": m.thresholds.to_dict(),
         "documents": [{"doc_id": d.doc_id, "publisher": d.publisher,
                        "title": d.title, "url": d.url} for d in corpus.MANIFEST],
+        "warming": "records" not in _STATE,
     }
 
 
