@@ -95,15 +95,22 @@ class BedrockBackend:
                                   read_timeout=60, connect_timeout=10))
         return self._client
 
-    def call(self, prompt: str, temperature: float) -> dict | None:
+    def call(self, prompt: str, temperature: float, *, system: str | None = None,
+             tool_name: str | None = None, tool_desc: str | None = None,
+             tool_schema: dict | None = None) -> dict | None:
+        # Overrides let a different domain (e.g. unihack/extract.py) supply its
+        # own system prompt and tool schema over this same Converse-API
+        # plumbing, instead of forking a second copy of the credential/retry
+        # handling. Every default preserves SpecLedger's own existing calls.
         resp = self.client().converse(
             modelId=self.model,
-            system=[{"text": SYSTEM}],
+            system=[{"text": system or SYSTEM}],
             messages=[{"role": "user", "content": [{"text": prompt}]}],
             toolConfig={
-                "tools": [{"toolSpec": {"name": TOOL_NAME, "description": TOOL_DESC,
-                                        "inputSchema": {"json": TOOL_SCHEMA}}}],
-                "toolChoice": {"tool": {"name": TOOL_NAME}},
+                "tools": [{"toolSpec": {"name": tool_name or TOOL_NAME,
+                                        "description": tool_desc or TOOL_DESC,
+                                        "inputSchema": {"json": tool_schema or TOOL_SCHEMA}}}],
+                "toolChoice": {"tool": {"name": tool_name or TOOL_NAME}},
             },
             inferenceConfig={"maxTokens": 700, "temperature": temperature},
         )
@@ -125,12 +132,14 @@ class AnthropicBackend:
             self._client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
         return self._client
 
-    def call(self, prompt: str, temperature: float) -> dict | None:
+    def call(self, prompt: str, temperature: float, *, system: str | None = None,
+             tool_name: str | None = None, tool_desc: str | None = None,
+             tool_schema: dict | None = None) -> dict | None:
         resp = self.client().messages.create(
-            model=self.model, max_tokens=700, system=SYSTEM, temperature=temperature,
-            tools=[{"name": TOOL_NAME, "description": TOOL_DESC,
-                    "input_schema": TOOL_SCHEMA}],
-            tool_choice={"type": "tool", "name": TOOL_NAME},
+            model=self.model, max_tokens=700, system=system or SYSTEM, temperature=temperature,
+            tools=[{"name": tool_name or TOOL_NAME, "description": tool_desc or TOOL_DESC,
+                    "input_schema": tool_schema or TOOL_SCHEMA}],
+            tool_choice={"type": "tool", "name": tool_name or TOOL_NAME},
             messages=[{"role": "user", "content": prompt}])
         return parse_anthropic(resp)
 
